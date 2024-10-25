@@ -759,6 +759,14 @@ light:
                 it[i] = Color::BLACK;
               }
             }
+            if (id(master_mute_switch).state) {
+              it[2] = Color::BLACK;
+              it[3] = muted_color;
+              it[4] = Color::BLACK;
+              it[8] = Color::BLACK;
+              it[9] = muted_color;
+              it[10] = Color::BLACK;
+            }
             id(global_led_animation_index) = (12 + id(global_led_animation_index) - 1) % 12;
       - addressable_rainbow:
           name: "Rainbow"
@@ -1140,7 +1148,7 @@ script:
           effect: "Timer Ring"
 
   # Script executed when the timer is ticking, to control the LEDs
-  # The LED ring blinks.
+  # The LEDs shows the remaining time as a fraction of the full ring.
   - id: control_leds_timer_ticking
     then:
       - light.turn_on:

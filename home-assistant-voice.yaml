@@ -387,25 +387,6 @@ binary_sensor:
                     event_type: "long_press"
       # Very important do not remove. Trust me :D
       - timing:
-          # E .
-          - ON for at most 0.2s
-          - OFF for 0.5s to 2s
-          # S ...
-          - ON for at most 0.2s
-          - OFF for 0s to 2s
-          - ON for at most 0.2s
-          - OFF for 0s to 2s
-          - ON for at most 0.2s
-          - OFF for 0.5s to 2s
-          # P .--.
-          - ON for at most 0.2s
-          - OFF for 0s to 2s
-          - ON for 0.2s to 2s
-          - OFF for 0s to 2s
-          - ON for 0.2s to 2s
-          - OFF for 0s to 2s
-          - ON for at most 0.2s
-          - OFF for 0.5s to 2s
           # H ....
           - ON for at most 0.2s
           - OFF for 0s to 2s
@@ -415,21 +396,10 @@ binary_sensor:
           - OFF for 0s to 2s
           - ON for at most 0.2s
           - OFF for 0.5s to 2s
-          # O ---
-          - ON for 0.2s to 2s
-          - OFF for 0s to 2s
-          - ON for 0.2s to 2s
-          - OFF for 0s to 2s
-          - ON for 0.2s to 2s
-          - OFF for 0.5s to 2s
-          # M --
-          - ON for 0.2s to 2s
-          - OFF for 0s to 2s
-          - ON for 0.2s to 2s
-          - OFF for 0.5s to 2s
-          # E .
+          # A ._
           - ON for at most 0.2s
-          - OFF for at least 0.5s
+          - OFF for 0s to 2s
+          - ON for 0.2s to 2s
         then:
           - if:
               condition:

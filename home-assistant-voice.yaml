@@ -1582,7 +1582,7 @@ voice_assistant:
           switch.is_off: timer_ringing
         then:
           - lambda: id(stop).disable();
-    # If the end happened becuase of an error, let the error phase on for a second
+    # If the end happened because of an error, let the error phase on for a second
     - if:
         condition:
           lambda: return id(voice_assistant_phase) == ${voice_assist_error_phase_id};

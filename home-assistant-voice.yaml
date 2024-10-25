@@ -1563,22 +1563,32 @@ voice_assistant:
   on_tts_start:
     - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
     - script.execute: control_leds
+    # Start a script that would potentially enable the stop word if the response is longer than a second
     - script.execute: activate_stop_word_if_tts_step_is_long
-  # When the voice assistant ends: Stop ducking audio.
+  # When the voice assistant ends ...
   on_end:
     - wait_until:
         not:
           voice_assistant.is_running:
+    # Stop ducking audio.
     - nabu.set_ducking:
         decibel_reduction: 0   # 0 dB means no reduction
         duration: 1.0s
+    # Stop the script that would potentially enable the stop word if the response is longer than a second
     - script.stop: activate_stop_word_if_tts_step_is_long
-    - lambda: id(stop).disable();
+    # Disable the stop word (If the tiemr is not ringing)
+    - if:
+        condition:
+          switch.is_off: timer_ringing
+        then:
+          - lambda: id(stop).disable();
+    # If the end happened becuase of an error, let the error phase on for a second
     - if:
         condition:
           lambda: return id(voice_assistant_phase) == ${voice_assist_error_phase_id};
         then:
           - delay: 1s
+    # Reset the voice assistant phase id and reset the LED animations.
     - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
     - script.execute: control_leds
   on_timer_finished:

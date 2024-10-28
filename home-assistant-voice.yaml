@@ -652,17 +652,29 @@ light:
           update_interval: 16ms
           lambda: |-
             static int8_t index = 0;
-            Color color(255, 0, 0);
+            Color muted_color(255, 0, 0);
+            auto light_color = id(led_ring).current_values;
+            Color color(light_color.get_red() * 255, light_color.get_green() * 255,
+                  light_color.get_blue() * 255);
             for (int i = 0; i < 12; i++) {
-              if (i == 3  && id(master_mute_switch).state ) {
-                it[i] = color;
-              } else if (i == 9 && id(master_mute_switch).state ) {
-                it[i] = color;
-              } else if (i == 6 && (id(nabu_media_player).volume == 0.0f || id(nabu_media_player).is_muted()) ) {
+              if ( light_color.get_state() ) {
                 it[i] = color;
               } else {
                 it[i] = Color::BLACK;
               }
+            }
+            if ( id(master_mute_switch).state ) {
+              it[2] = Color::BLACK;
+              it[3] = muted_color;
+              it[4] = Color::BLACK;
+              it[8] = Color::BLACK;
+              it[9] = muted_color;
+              it[10] = Color::BLACK;
+            }
+            if ( id(nabu_media_player).volume == 0.0f || id(nabu_media_player).is_muted() ) {
+              it[5] = Color::BLACK;
+              it[6] = muted_color;
+              it[7] = Color::BLACK;
             }
       - addressable_lambda:
           name: "Volume Display"
@@ -681,7 +693,7 @@ light:
               }
             }
             if (id(nabu_media_player).volume == 0.0f) {
-              it[6] = silenced_color * 128;
+              it[6] = silenced_color;
             }
       - addressable_lambda:
           name: "Center Button Touched"
@@ -692,7 +704,7 @@ light:
               auto led_ring_cv = id(led_ring).current_values;
               auto va_leds_call = id(voice_assistant_leds).make_call();
               va_leds_call.from_light_color_values(led_ring_cv);
-              va_leds_call.set_brightness(1.0);
+              va_leds_call.set_brightness( min ( max( id(led_ring).current_values.get_brightness() , 0.2f ) + 0.1f , 1.0f ) );
               va_leds_call.set_state(true);
               va_leds_call.perform();
             }
@@ -705,12 +717,29 @@ light:
       - addressable_twinkle:
           name: "Twinkle"
           twinkle_probability: 50%
-      - pulse:
-          name: "Fast Pulse"
-          transition_length: 100ms
-          update_interval: 100ms
-          min_brightness: 50%
-          max_brightness: 100%
+      - addressable_lambda:
+          name: "Error"
+          update_interval: 10ms
+          lambda: |-
+            static uint8_t brightness_step = 0;
+            static bool brightness_decreasing = true;
+            static uint8_t brightness_step_number = 10;
+            if (initial_run) {
+              brightness_step = 0;
+              brightness_decreasing = true;
+            }
+            Color error_color(255, 0, 0);
+            for (int i = 0; i < 12; i++) {
+              it[i] = error_color * uint8_t(255/brightness_step_number*(brightness_step_number-brightness_step));
+            }
+            if (brightness_decreasing) {
+              brightness_step++;
+            } else {
+              brightness_step--;
+            }
+            if (brightness_step == 0 || brightness_step == brightness_step_number) {
+              brightness_decreasing = !brightness_decreasing;
+            }
       - addressable_lambda:
           name: "Timer Ring"
           update_interval: 10ms
@@ -980,7 +1009,7 @@ script:
   - id: control_leds_improv_ble_state
     then:
       - light.turn_on:
-          brightness: 100%
+          brightness: 66%
           red: 100%
           green: 89%
           blue: 71%
@@ -996,7 +1025,7 @@ script:
             wifi.connected:
           then:
             - light.turn_on:
-                brightness: 100%
+                brightness: 66%
                 red: 9.4%
                 green: 73.3%
                 blue: 94.9%
@@ -1004,7 +1033,7 @@ script:
                 effect: "Twinkle"
           else:
             - light.turn_on:
-                brightness: 50%
+                brightness: 66%
                 red: 100%
                 green: 89%
                 blue: 71%
@@ -1016,7 +1045,7 @@ script:
   - id: control_leds_no_ha_connection_state
     then:
       - light.turn_on:
-          brightness: 100%
+          brightness: 66%
           red: 1
           green: 0
           blue: 0
@@ -1039,7 +1068,7 @@ script:
   - id: control_leds_voice_assistant_waiting_for_command_phase
     then:
       - light.turn_on:
-          brightness: !lambda return id(led_ring).current_values.get_brightness();
+          brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Waiting for Command"
 
@@ -1048,7 +1077,7 @@ script:
   - id: control_leds_voice_assistant_listening_for_command_phase
     then:
       - light.turn_on:
-          brightness: !lambda return id(led_ring).current_values.get_brightness();
+          brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Listening For Command"
 
@@ -1057,7 +1086,7 @@ script:
   - id: control_leds_voice_assistant_thinking_phase
     then:
       - light.turn_on:
-          brightness: !lambda return id(led_ring).current_values.get_brightness();
+          brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Thinking"
 
@@ -1066,7 +1095,7 @@ script:
   - id: control_leds_voice_assistant_replying_phase
     then:
       - light.turn_on:
-          brightness: !lambda return id(led_ring).current_values.get_brightness();
+          brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Replying"
 
@@ -1075,19 +1104,19 @@ script:
   - id: control_leds_voice_assistant_error_phase
     then:
       - light.turn_on:
-          brightness: 100%
+          brightness: !lambda return min ( max( id(led_ring).current_values.get_brightness() , 0.2f ) + 0.1f , 1.0f );
           red: 1
           green: 0
           blue: 0
           id: voice_assistant_leds
-          effect: "Fast Pulse"
+          effect: "Error"
 
   # Script executed when the voice assistant is muted or silent
   # The LED next to the 2 microphones turn red / one red LED next to the speaker grill
   - id: control_leds_muted_or_silent
     then:
       - light.turn_on:
-          brightness: !lambda return id(led_ring).current_values.get_brightness();
+          brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Muted or Silent"
 
@@ -1095,7 +1124,7 @@ script:
   - id: control_leds_voice_assistant_not_ready_phase
     then:
       - light.turn_on:
-          brightness: 100%
+          brightness: 66%
           red: 1
           green: 0
           blue: 0
@@ -1107,7 +1136,7 @@ script:
   - id: control_leds_dial_touched
     then:
       - light.turn_on:
-          brightness: 100%
+          brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Volume Display"
 
@@ -1116,7 +1145,7 @@ script:
   - id: control_leds_jack_unplugged_recently
     then:
       - light.turn_on:
-          brightness: 100%
+          brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Jack Unplugged"
 
@@ -1125,7 +1154,7 @@ script:
   - id: control_leds_jack_plugged_recently
     then:
       - light.turn_on:
-          brightness: 100%
+          brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Jack Plugged"
 
@@ -1134,7 +1163,7 @@ script:
   - id: control_leds_center_button_touched
     then:
       - light.turn_on:
-          brightness: 100%
+          brightness: !lambda return min ( max( id(led_ring).current_values.get_brightness() , 0.2f ) + 0.1f , 1.0f );
           id: voice_assistant_leds
           effect: "Center Button Touched"
 
@@ -1143,7 +1172,7 @@ script:
   - id: control_leds_timer_ringing
     then:
       - light.turn_on:
-          brightness: 100%
+          brightness: !lambda return min ( max( id(led_ring).current_values.get_brightness() , 0.2f ) + 0.1f , 1.0f );
           id: voice_assistant_leds
           effect: "Timer Ring"
 
@@ -1152,7 +1181,7 @@ script:
   - id: control_leds_timer_ticking
     then:
       - light.turn_on:
-          brightness: !lambda return id(led_ring).current_values.get_brightness();
+          brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Timer tick"
 

@@ -672,10 +672,10 @@ light:
             Color color(light_color.get_red() * 255, light_color.get_green() * 255,
                   light_color.get_blue() * 255);
             Color silenced_color(255, 0, 0);
-            auto nb_leds_on = 12.0f * id(nabu_media_player).volume;
+            auto volume_ratio = 12.0f * id(nabu_media_player).volume;
             for (int i = 0; i < 12; i++) {
-              if (i < nb_leds_on) {
-                it[(6+i)%12] = color;
+              if (i <= volume_ratio) {
+                it[(6+i)%12] = color * min( 255.0f * (volume_ratio - i) , 255.0f ) ;
               } else {
                 it[(6+i)%12] = Color::BLACK;
               }
@@ -754,7 +754,7 @@ light:
             for (int i = 0; i < 12; i++) {
               float brightness_dip = ( i == id(global_led_animation_index) % 12 && i != last_led_on ) ? 0.9f : 1.0f ;
               if (i <= timer_ratio) {
-                it[i] = color * min (255.0f * brightness_dip * (timer_ratio - i) , 255.0f * brightness_dip) ;
+                it[i] = color * min(255.0f * brightness_dip * (timer_ratio - i) , 255.0f * brightness_dip) ;
               } else {
                 it[i] = Color::BLACK;
               }

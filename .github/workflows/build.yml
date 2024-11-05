@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build-firmware:
     name: Build Firmware
-    uses: esphome/workflows/.github/workflows/build.yml@main
+    uses: esphome/workflows/.github/workflows/build.yml@2024.10.0
     with:
       files: |
         home-assistant-voice.factory.yaml
@@ -61,7 +61,7 @@ jobs:
     name: Upload to R2
     needs:
       - build-firmware
-    uses: esphome/workflows/.github/workflows/upload.yml@main
+    uses: esphome/workflows/.github/workflows/upload.yml@2024.10.0
     with:
       directory: home-assistant-voice-pe
       version: ${{ needs.build-firmware.outputs.version }}

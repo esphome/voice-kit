@@ -31,7 +31,7 @@ update:
     source: https://firmware.esphome.io/home-assistant-voice-pe/home-assistant-voice/manifest.json
 
 dashboard_import:
-  package_import_url: github://esphome/voice-kit/home-assistant-voice.yaml
+  package_import_url: github://esphome/home-assistant-voice-pe/home-assistant-voice.yaml
 
 wifi:
   on_connect:

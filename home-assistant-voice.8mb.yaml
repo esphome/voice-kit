@@ -15,4 +15,4 @@ update:
     source: https://firmware.esphome.io/home-assistant-voice-pe/ha-voice-8mb/manifest.json
 
 dashboard_import:
-  package_import_url: github://esphome/voice-kit/home-assistant-voice.8mb.yaml
+  package_import_url: github://esphome/home-assistant-voice-pe/home-assistant-voice.8mb.yaml

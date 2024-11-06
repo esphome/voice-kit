@@ -1549,7 +1549,9 @@ voice_assistant:
   on_error:
     - if:
         condition:
-          lambda: return !id(init_in_progress);
+          and:
+            - lambda: return !id(init_in_progress);
+            - lambda: return code != "duplicate_wake_up_detected";
         then:
           - lambda: id(voice_assistant_phase) = ${voice_assist_error_phase_id};
           - script.execute: control_leds

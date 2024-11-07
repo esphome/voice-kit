@@ -423,6 +423,9 @@ binary_sensor:
                     brightness: 100%
                     id: voice_assistant_leds
                     effect: "Rainbow"
+                - event.trigger:
+                    id: button_press_event
+                    event_type: "easter_egg_press"
       # Factory Reset Warning
       #  . Audible and Visible warning.
       - timing:
@@ -954,6 +957,7 @@ event:
       - double_press
       - triple_press
       - long_press
+      - easter_egg_press
 
 script:
   # Master script controlling the LEDs, based on different conditions : initialization in progress, wifi and api connected and voice assistant phase.

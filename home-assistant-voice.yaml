@@ -261,9 +261,6 @@ switch:
   - platform: gpio
     pin: GPIO46
     id: grove_port_power
-    name: "Grove port power"
-    disabled_by_default: true
-    entity_category: config
     restore_mode: RESTORE_DEFAULT_OFF
 
 binary_sensor:

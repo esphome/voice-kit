@@ -1388,7 +1388,9 @@ speaker:
     bits_per_sample: 32bit
     i2s_audio_id: i2s_output
     dac_type: external
-    channel: left
+    channel: stereo
+    timeout: never
+    buffer_duration: 100ms
 
 media_player:
   - platform: nabu

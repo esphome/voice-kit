@@ -1,0 +1,36 @@
+name: Update latest build
+
+on:
+  release:
+    types: [edited]
+
+jobs:
+  update-latest:
+    name: Update latest build version
+    runs-on: ubuntu-latest
+    environment: production
+    if: ${{ !contains(github.event.release.tag_name, 'beta') && github.event.changes.make_latest && github.event.changes.make_latest.to == 'true' }}
+    strategy:
+      matrix:
+        device:
+          - home-assistant-voice
+          - ha-voice-8mb
+    steps:
+      - name: Download version manifest from R2
+        run: curl -o manifest.json https://firmware.esphome.io/home-assistant-voice-pe/${{ matrix.device }}/${{ github.event.release.tag_name }}/manifest.json
+      - name: Update paths
+        run: |
+          mkdir output
+          version="${{ github.event.release.tag_name }}"
+          jq --arg version "$version" \
+              '.builds[].ota.path |= $version + "/" + . | (.builds[].parts // [])[].path |= $version + "/" + .' \
+              manifest.json > output/manifest.json
+      - name: Upload updated manifest to R2
+        uses: ryand56/r2-upload-action@v1.3.4
+        with:
+          r2-account-id: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.CLOUDFLARE_R2_BUCKET }}
+          source-dir: output
+          destination-dir: home-assistant-voice-pe/${{ matrix.device }}/

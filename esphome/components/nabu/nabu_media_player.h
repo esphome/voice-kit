@@ -38,7 +38,7 @@ struct VolumeRestoreState {
 
 class NabuMediaPlayer : public Component, public media_player::MediaPlayer {
  public:
-  float get_setup_priority() const override { return esphome::setup_priority::LATE; }
+  float get_setup_priority() const override { return esphome::setup_priority::PROCESSOR; }
   void setup() override;
   void loop() override;
 

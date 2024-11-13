@@ -168,6 +168,10 @@ esp_err_t NabuMediaPlayer::start_pipeline_(AudioPipelineType type, bool url) {
 }
 
 void NabuMediaPlayer::watch_media_commands_() {
+  if (!this->is_ready()) {
+    return;
+  }
+
   MediaCallCommand media_command;
   CommandEvent command_event;
   esp_err_t err = ESP_OK;
@@ -335,6 +339,10 @@ void NabuMediaPlayer::set_ducking_reduction(uint8_t decibel_reduction, float dur
 }
 
 void NabuMediaPlayer::control(const media_player::MediaPlayerCall &call) {
+  if (!this->is_ready()) {
+    return;
+  }
+
   MediaCallCommand media_command;
 
   if (call.get_announcement().has_value() && call.get_announcement().value()) {

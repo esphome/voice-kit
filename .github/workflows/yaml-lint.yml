@@ -7,9 +7,6 @@ on:
       - "**.yaml"
       - "**.yml"
   pull_request:
-    paths:
-      - "**.yaml"
-      - "**.yml"
 
 jobs:
   yamllint:

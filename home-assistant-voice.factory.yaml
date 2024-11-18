@@ -65,6 +65,8 @@ switch:
     on_turn_on:
       - logger.log: "OTA updates set to use Beta firmware"
       - lambda: id(update_http_request).set_source_url("https://firmware.esphome.io/home-assistant-voice-pe/home-assistant-voice/manifest-beta.json");
+      - component.update: update_http_request
     on_turn_off:
       - logger.log: "OTA updates set to use Production firmware"
       - lambda: id(update_http_request).set_source_url("https://firmware.esphome.io/home-assistant-voice-pe/home-assistant-voice/manifest.json");
+      - component.update: update_http_request

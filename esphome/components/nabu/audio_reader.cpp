@@ -14,7 +14,7 @@ namespace nabu {
 static const size_t READ_WRITE_TIMEOUT_MS = 20;
 
 // The number of times the http read times out with no data before throwing an error
-static const size_t ERROR_COUNT_NO_DATA_READ_TIMEOUT = 10;
+static const size_t ERROR_COUNT_NO_DATA_READ_TIMEOUT = 50;
 
 AudioReader::AudioReader(esphome::RingBuffer *output_ring_buffer, size_t transfer_buffer_size) {
   this->output_ring_buffer_ = output_ring_buffer;
@@ -188,6 +188,7 @@ AudioReaderState AudioReader::http_read_() {
           this->cleanup_connection_();
           return AudioReaderState::FAILED;
         }
+        vTaskDelay(pdMS_TO_TICKS(READ_WRITE_TIMEOUT_MS));
       }
     }
   }

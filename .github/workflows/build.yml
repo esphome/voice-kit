@@ -21,7 +21,7 @@ jobs:
       files: |
         home-assistant-voice.factory.yaml
         home-assistant-voice.8mb.yaml
-      esphome-version: dev
+      esphome-version: 2024.11.0b2
       release-summary: ${{ github.event_name == 'release' && github.event.release.body || '' }}
       release-url: ${{ github.event_name == 'release' && github.event.release.html_url || '' }}
       release-version: ${{ github.event_name == 'release' && github.event.release.tag_name || '' }}

@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build-firmware:
     name: Build Firmware
-    uses: esphome/workflows/.github/workflows/build.yml@2024.10.0
+    uses: esphome/workflows/.github/workflows/build.yml@2024.11.1
     with:
       files: |
         home-assistant-voice.factory.yaml
@@ -56,14 +56,50 @@ jobs:
             [download]: ${url}`
             })
 
-  upload:
+  upload-to-r2:
     if: github.event_name == 'release'
     name: Upload to R2
     needs:
       - build-firmware
-    uses: esphome/workflows/.github/workflows/upload.yml@2024.10.0
+    uses: esphome/workflows/.github/workflows/upload-to-r2.yml@2024.11.1
     with:
       directory: home-assistant-voice-pe
-      version: ${{ needs.build-firmware.outputs.version }}
-      channel: ${{ github.event.release.prerelease && 'beta' || 'production' }}
+    secrets: inherit
+
+  summary:
+    if: github.event_name == 'release'
+    name: Generate Summary
+    runs-on: ubuntu-latest
+    needs:
+      - upload-to-r2
+    steps:
+      - name: Generate
+        run: |-
+          echo "## Firmware built successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[Install here](https://esphome.github.io/home-assistant-voice-pe/?version=${{ github.event.release.tag_name }}) and test **before** approving deployment to beta or production." >> $GITHUB_STEP_SUMMARY
+
+  promote-beta:
+    name: Promote to Beta
+    uses: esphome/workflows/.github/workflows/promote-r2.yml@2024.11.1
+    needs:
+      - upload-to-r2
+    with:
+      version: ${{ github.event.release.tag_name }}
+      directory: home-assistant-voice-pe
+      channel: beta
+      manifest-filename: manifest-beta.json
+    secrets: inherit
+
+  promote-prod:
+    name: Promote to Production
+    if: github.event.release.prerelease == false
+    uses: esphome/workflows/.github/workflows/promote-r2.yml@2024.11.1
+    needs:
+      - upload-to-r2
+    with:
+      version: ${{ github.event.release.tag_name }}
+      directory: home-assistant-voice-pe
+      channel: production
+      manifest-filename: manifest.json
     secrets: inherit

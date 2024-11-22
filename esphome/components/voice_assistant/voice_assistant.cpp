@@ -618,6 +618,8 @@ void VoiceAssistant::request_stop() {
       this->desired_state_ = State::IDLE;
       break;
     case State::AWAITING_RESPONSE:
+      this->signal_stop_();
+      break;
     case State::STREAMING_RESPONSE:
     case State::RESPONSE_FINISHED:
       break;  // Let the incoming audio stream finish then it will go to idle.

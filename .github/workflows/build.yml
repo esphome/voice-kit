@@ -79,8 +79,18 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "[Install here](https://esphome.github.io/home-assistant-voice-pe/?version=${{ github.event.release.tag_name }}) and test **before** approving deployment to beta or production." >> $GITHUB_STEP_SUMMARY
 
+  upload-to-release:
+    name: Upload to Release
+    if: github.event_name == 'release'
+    uses: esphome/workflows/.github/workflows/upload-to-gh-release.yml@2024.11.1
+    needs:
+      - build-firmware
+    with:
+      version: ${{ github.event.release.tag_name }}
+
   promote-beta:
     name: Promote to Beta
+    if: github.event_name == 'release'
     uses: esphome/workflows/.github/workflows/promote-r2.yml@2024.11.1
     needs:
       - upload-to-r2
@@ -93,7 +103,7 @@ jobs:
 
   promote-prod:
     name: Promote to Production
-    if: github.event.release.prerelease == false
+    if: github.event_name == 'release' && github.event.release.prerelease == false
     uses: esphome/workflows/.github/workflows/promote-r2.yml@2024.11.1
     needs:
       - upload-to-r2

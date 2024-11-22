@@ -14,6 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out configuration from GitHub
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.2
       - name: 🚀 Run yamllint
         run: yamllint --strict .

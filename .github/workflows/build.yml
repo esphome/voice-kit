@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build-firmware:
     name: Build Firmware
-    uses: esphome/workflows/.github/workflows/build.yml@2024.11.1
+    uses: esphome/workflows/.github/workflows/build.yml@2024.11.3
     with:
       files: |
         home-assistant-voice.factory.yaml
@@ -61,7 +61,7 @@ jobs:
     name: Upload to R2
     needs:
       - build-firmware
-    uses: esphome/workflows/.github/workflows/upload-to-r2.yml@2024.11.1
+    uses: esphome/workflows/.github/workflows/upload-to-r2.yml@2024.11.3
     with:
       directory: home-assistant-voice-pe
     secrets: inherit
@@ -82,7 +82,7 @@ jobs:
   upload-to-release:
     name: Upload to Release
     if: github.event_name == 'release'
-    uses: esphome/workflows/.github/workflows/upload-to-gh-release.yml@2024.11.1
+    uses: esphome/workflows/.github/workflows/upload-to-gh-release.yml@2024.11.3
     needs:
       - build-firmware
     with:
@@ -91,7 +91,7 @@ jobs:
   promote-beta:
     name: Promote to Beta
     if: github.event_name == 'release'
-    uses: esphome/workflows/.github/workflows/promote-r2.yml@2024.11.1
+    uses: esphome/workflows/.github/workflows/promote-r2.yml@2024.11.3
     needs:
       - upload-to-r2
     with:
@@ -104,7 +104,7 @@ jobs:
   promote-prod:
     name: Promote to Production
     if: github.event_name == 'release' && github.event.release.prerelease == false
-    uses: esphome/workflows/.github/workflows/promote-r2.yml@2024.11.1
+    uses: esphome/workflows/.github/workflows/promote-r2.yml@2024.11.3
     needs:
       - upload-to-r2
     with:

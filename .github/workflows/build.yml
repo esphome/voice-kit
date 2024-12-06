@@ -42,7 +42,8 @@ jobs:
               repo: context.repo.repo,
               run_id: context.runId,
             })
-            const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts/${artifacts['data']['artifacts'][0]['id']}`
+            const artifact = artifacts['data']['artifacts'].find(a => a.name === 'home-assistant-voice')
+            const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts/${artifact['id']}`
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

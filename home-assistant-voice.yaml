@@ -1491,7 +1491,7 @@ audio_dac:
 micro_wake_word:
   id: mww
   models:
-    - model: https://github.com/kahrendt/microWakeWord/releases/download/okay_nabu_20241204.6/okay_nabu.json
+    - model: https://github.com/kahrendt/microWakeWord/releases/download/okay_nabu_20241205.4/okay_nabu.json
       id: okay_nabu
     - model: hey_jarvis
       id: hey_jarvis

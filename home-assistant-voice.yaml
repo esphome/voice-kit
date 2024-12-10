@@ -117,9 +117,10 @@ ota:
     id: ota_esphome
 
 i2c:
-  sda: GPIO5
-  scl: GPIO6
-  frequency: 400kHz
+  - id: internal_i2c
+    sda: GPIO5
+    scl: GPIO6
+    frequency: 400kHz
 
 psram:
   mode: octal
@@ -1462,6 +1463,7 @@ media_player:
         file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/easter_egg_tada.mp3
 
 voice_kit:
+  i2c_id: internal_i2c
   reset_pin: GPIO4
   firmware:
     url: https://github.com/esphome/voice-kit-xmos-firmware/releases/download/v1.3.1/ffva_v1.3.1_upgrade.bin
@@ -1487,6 +1489,7 @@ external_components:
 
 audio_dac:
   - platform: aic3204
+    i2c_id: internal_i2c
 
 micro_wake_word:
   id: mww

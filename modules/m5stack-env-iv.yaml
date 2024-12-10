@@ -1,0 +1,15 @@
+sensor:
+  - platform: sht4x
+    i2c_id: grove_i2c
+    temperature:
+      name: Temperature
+    humidity:
+      name: Humidity
+
+  - platform: bmp280_i2c
+    i2c_id: grove_i2c
+    address: 0x76
+    temperature:
+      name: Temperature 2
+    pressure:
+      name: Pressure

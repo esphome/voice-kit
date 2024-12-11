@@ -258,11 +258,6 @@ switch:
     entity_category: config
     restore_mode: ALWAYS_OFF
     internal: true
-  - platform: gpio
-    pin: GPIO46
-    id: grove_port_power
-    # Change this to ALWAYS_ON if you are planning to use the Grove port
-    restore_mode: RESTORE_DEFAULT_OFF
 
 binary_sensor:
   # Center Button. Used for many things (See on_multi_click)

@@ -1,0 +1,6 @@
+switch:
+  - platform: gpio
+    pin: GPIO46
+    id: grove_port_power
+    restore_mode: ALWAYS_ON
+    setup_priority: 1001  # This sets the pin to be on before the i2c scan happens (priority 1000)

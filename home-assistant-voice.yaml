@@ -175,6 +175,11 @@ globals:
   - id: is_timer_active
     type: bool
     restore_value: false
+  # Global variable storing if a factory reset was requested. If it is set to true, the device will factory reset once the center button is released
+  - id: factory_reset_requested
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 switch:
   # This is the master mute switch. It is exposed to Home Assistant. The user can only turn it on and off if the hardware switch is off. (The hardware switch overrides the software one)
@@ -271,6 +276,12 @@ binary_sensor:
       - script.execute: control_leds
     on_release:
       - script.execute: control_leds
+      # If a factory reset is requested, factory reset on release
+      - if:
+          condition:
+            lambda: return id(factory_reset_requested);
+          then:
+            - button.press: factory_reset_button
     on_multi_click:
       # Simple Click:
       #   - Abort "things" in order
@@ -451,7 +462,9 @@ binary_sensor:
                     id: play_sound
                     priority: true
                     sound_file: !lambda return id(factory_reset_cancelled_sound);
-      # Factory Reset
+      # Factory Reset Confirmed.
+      #  . Audible warning to prompt user to release the button
+      #  . Set factory_reset_requested to true
       - timing:
           - ON for at least 22s
         then:
@@ -459,7 +472,19 @@ binary_sensor:
               condition:
                 lambda: return !id(dial_touched);
               then:
-                - button.press: factory_reset_button
+                - script.execute:
+                    id: play_sound
+                    priority: true
+                    sound_file: !lambda return id(factory_reset_confirmed_sound);
+                - light.turn_on:
+                    brightness: 100%
+                    red: 100%
+                    green: 0%
+                    blue: 0%
+                    id: voice_assistant_leds
+                    effect: "none"
+                - lambda: id(factory_reset_requested) = true;
+
   # Hardware mute switch (Side of the device)
   - platform: gpio
     id: hardware_mute_switch
@@ -481,7 +506,7 @@ binary_sensor:
       - switch.template.publish:
           id: master_mute_switch
           state: OFF
-  # Audio Jack PLugged sensor
+  # Audio Jack Plugged sensor
   - platform: gpio
     id: jack_plugged
     # Debouncing it a bit because it can be activated back and forth as you plug the audio jack
@@ -1440,6 +1465,8 @@ media_player:
         file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/factory_reset_initiated.mp3
       - id: factory_reset_cancelled_sound
         file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/factory_reset_cancelled.mp3
+      - id: factory_reset_confirmed_sound
+        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/factory_reset_confirmed.mp3
       - id: jack_connected_sound
         file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/jack_connected.flac
       - id: jack_disconnected_sound

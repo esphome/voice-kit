@@ -457,11 +457,15 @@ binary_sensor:
                     sound_file: !lambda return id(factory_reset_initiated_sound);
                 - wait_until:
                     binary_sensor.is_off: center_button
-                - light.turn_off: voice_assistant_leds
-                - script.execute:
-                    id: play_sound
-                    priority: true
-                    sound_file: !lambda return id(factory_reset_cancelled_sound);
+                - if:
+                    condition:
+                      lambda: return !id(factory_reset_requested);
+                    then:
+                      - light.turn_off: voice_assistant_leds
+                      - script.execute:
+                          id: play_sound
+                          priority: true
+                          sound_file: !lambda return id(factory_reset_cancelled_sound);
       # Factory Reset Confirmed.
       #  . Audible warning to prompt user to release the button
       #  . Set factory_reset_requested to true

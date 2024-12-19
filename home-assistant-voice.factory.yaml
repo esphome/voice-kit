@@ -41,6 +41,9 @@ wifi:
 
 improv_serial:
 
+esp32_ble:
+  name: ha-voice-pe
+
 esp32_improv:
   authorizer: center_button
   on_start:

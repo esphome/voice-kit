@@ -1,40 +1,95 @@
 <html>
+  <head>
+    <title>Home Assistant Voice PE</title>
+    <meta
+      name="description"
+      content="Install firmware on Home Assistant Voice PE."
+    />
+    <style>
+      /* Basic styling for the details element */
+      details {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        width: 300px;
+        background-color: #f9f9f9;
+        margin: 10px;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease-in-out;
+      }
 
-<head>
-  <title>Home Assistant Voice PE</title>
-</head>
+      /* Styling for the summary element */
+      summary {
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        outline: none;
+      }
 
-<body>
-  <div>
+      /* Hover effect for summary */
+      summary:hover {
+        color: #007bff;
+      }
 
-    <h1>Install Voice PE Latest Firmware</h1>
-    <esp-web-install-button
-      manifest="https://firmware.esphome.io/home-assistant-voice-pe/home-assistant-voice/manifest.json">
-    </esp-web-install-button>
-  </div>
-  <br />
-  <details>
-    <summary>Install Specific Version</summary>
-    Version: <input />
-  </details>
-  <script>
-    function setVersion(version) {
-      document.querySelector('h1').innerHTML = `Install Voice PE v${version}`;
-      document.querySelector('esp-web-install-button').manifest = `https://firmware.esphome.io/home-assistant-voice-pe/home-assistant-voice/${version}/manifest.json`;
-    }
+      /* Open details transition */
+      details[open] {
+        border-color: #007bff;
+        background-color: #eef6ff;
+      }
 
-    document.querySelector('input').addEventListener('change', ev => {
-      const version = ev.target.value;
-      setVersion(version);
-    });
-    var urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('version')) {
-      const version = urlParams.get('version');
-      setVersion(version);
-    }
-  </script>
+      details[open] summary {
+        margin-bottom: 12px;
+      }
 
-</body>
-<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+      .link {
+        margin-top: 8px;
+      }
+    </style>
+  </head>
 
+  <body>
+    <div>
+      <h1>Install Voice PE Latest Firmware</h1>
+      <p>
+        Connect your Home Assistant Voice to your computer and click on connect
+        below.
+      </p>
+      <esp-web-install-button
+        manifest="https://firmware.esphome.io/home-assistant-voice-pe/home-assistant-voice/manifest.json"
+      >
+      </esp-web-install-button>
+    </div>
+    <br />
+    <details>
+      <summary>Install Specific Version</summary>
+      Version: <input /><br />
+      <div class="link"></div>
+    </details>
+    <script>
+      function setVersion(version) {
+        document.querySelector("h1").innerHTML = `Install Voice PE v${version}`;
+        document.querySelector(
+          "esp-web-install-button",
+        ).manifest = `https://firmware.esphome.io/home-assistant-voice-pe/home-assistant-voice/${version}/manifest.json`;
+        document.querySelector(
+          ".link",
+        ).innerHTML = `<a href="?version=${version}">Link to v${version}</a>`;
+      }
+
+      document.querySelector("input").addEventListener("input", (ev) => {
+        const version = ev.target.value;
+        setVersion(version);
+      });
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has("version")) {
+        const version = urlParams.get("version");
+        setVersion(version);
+      }
+    </script>
+  </body>
+  <script
+    type="module"
+    src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"
+  ></script>
 </html>

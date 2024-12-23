@@ -1,0 +1,51 @@
+switch:
+  # This is the master mute switch. It is exposed to Home Assistant. The user can only turn it on and off if the hardware switch is off. (The hardware switch overrides the software one)
+  - platform: template
+    id: master_mute_switch
+    restore_mode: RESTORE_DEFAULT_OFF
+    icon: "mdi:microphone-off"
+    name: Mute
+    entity_category: config
+    turn_on_action:
+      - if:
+          condition:
+            binary_sensor.is_off: hardware_mute_switch
+          then:
+            - switch.template.publish:
+                id: master_mute_switch
+                state: ON
+    turn_off_action:
+      - if:
+          condition:
+            binary_sensor.is_off: hardware_mute_switch
+          then:
+            - switch.template.publish:
+                id: master_mute_switch
+                state: OFF
+    on_turn_on:
+      - script.execute: control_leds
+    on_turn_off:
+      - script.execute: control_leds
+
+binary_sensor:
+  # Hardware mute switch (Side of the device)
+  - platform: gpio
+    id: hardware_mute_switch
+    internal: true
+    pin: GPIO3
+    on_press:
+      - script.execute:
+          id: play_sound
+          priority: false
+          sound_file: !lambda return id(mute_switch_on_sound);
+      - switch.template.publish:
+          id: master_mute_switch
+          state: ON
+    on_release:
+      - script.execute:
+          id: play_sound
+          priority: false
+          sound_file: !lambda return id(mute_switch_off_sound);
+      - switch.template.publish:
+          id: master_mute_switch
+          state: OFF

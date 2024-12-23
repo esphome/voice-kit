@@ -1,0 +1,127 @@
+globals:
+  # Global variable tracking if the dial was recently touched.
+  - id: dial_touched
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  # Global variable tracking if the LED color was recently changed.
+  - id: color_changed
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+sensor:
+  # The dial. Used to control volume and Hue of the LED ring.
+  - platform: rotary_encoder
+    id: dial
+    pin_a: GPIO16
+    pin_b: GPIO18
+    resolution: 2
+    on_clockwise:
+      - lambda: id(dial_touched) = true;
+      - if:
+          condition:
+            binary_sensor.is_off: center_button
+          then:
+            - script.execute:
+                id: control_volume
+                increase_volume: true
+          else:
+            - script.execute:
+                id: control_hue
+                increase_hue: true
+    on_anticlockwise:
+      - lambda: id(dial_touched) = true;
+      - if:
+          condition:
+            binary_sensor.is_off: center_button
+          then:
+            - script.execute:
+                id: control_volume
+                increase_volume: false
+          else:
+            - script.execute:
+                id: control_hue
+                increase_hue: false
+
+script:
+  # Script executed when the volume is increased/decreased from the dial
+  - id: control_volume
+    mode: restart
+    parameters:
+      increase_volume: bool  # True: Increase volume / False: Decrease volume.
+    then:
+      - delay: 16ms
+      - if:
+          condition:
+            lambda: return increase_volume;
+          then:
+            - media_player.volume_up:
+          else:
+            - media_player.volume_down:
+      - script.execute: control_leds
+      - delay: 1s
+      - lambda: id(dial_touched) = false;
+      - sensor.rotary_encoder.set_value:
+          id: dial
+          value: 0
+      - script.execute: control_leds
+
+  # Script executed when the hue is increased/decreased from the dial
+  - id: control_hue
+    mode: restart
+    parameters:
+      increase_hue: bool  # True: Increase hue / False: Decrease hue.
+    then:
+      - delay: 16ms
+      - if:
+          condition:
+            lambda: return(abs(int(id(dial).state)) > 3 || id(color_changed));
+          then:
+            - lambda: |
+                id(color_changed) = true;
+                auto light_color = id(voice_assistant_leds).current_values;
+                int hue = 0;
+                float saturation = 0;
+                float value = 0;
+                rgb_to_hsv( light_color.get_red(),
+                            light_color.get_green(),
+                            light_color.get_blue(),
+                            hue,
+                            saturation,
+                            value);
+                if (increase_hue) {
+                  hue = (hue + 10) % 360;
+                } else {
+                  hue = (hue + 350) % 360;
+                }
+                if (saturation < 0.05) {
+                  saturation = 1;
+                }
+                float red = 0;
+                float green = 0;
+                float blue = 0;
+                hsv_to_rgb( hue,
+                            saturation,
+                            value,
+                            red,
+                            green,
+                            blue);
+                id(voice_assistant_leds).make_call().set_rgb(red, green, blue).perform();
+      - wait_until:
+          binary_sensor.is_off: center_button
+      - lambda: |
+          id(dial_touched) = false;
+          // now we "save" the new LED color/state to led_ring, maintaining its brightness and state
+          auto led_ring_call = id(led_ring).make_call();
+          auto va_leds_cv = id(voice_assistant_leds).current_values;
+          led_ring_call.from_light_color_values(va_leds_cv);
+          led_ring_call.set_brightness(id(led_ring).current_values.get_brightness());
+          led_ring_call.set_state(id(led_ring).current_values.is_on());
+          led_ring_call.perform();
+      - sensor.rotary_encoder.set_value:
+          id: dial
+          value: 0
+      - script.execute: control_leds
+      - delay: 500ms
+      - lambda: id(color_changed) = false;

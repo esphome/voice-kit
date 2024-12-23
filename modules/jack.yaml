@@ -1,0 +1,50 @@
+globals:
+  # Global variable tracking if the jack has been plugged.
+  - id: jack_plugged_recently
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  # Global variable tracking if the jack has been unplugged.
+  - id: jack_unplugged_recently
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+binary_sensor:
+  # Audio Jack Plugged sensor
+  - platform: gpio
+    id: jack_plugged
+    # Debouncing it a bit because it can be activated back and forth as you plug the audio jack
+    filters:
+      - delayed_on: 200ms
+      - delayed_off: 200ms
+    pin:
+      number: GPIO17
+    # When the jack is plugged in:
+    #  - LED animation
+    #  - Sound played
+    on_press:
+      - lambda: id(jack_plugged_recently) = true;
+      - script.execute: control_leds
+      - delay: 200ms
+      - script.execute:
+          id: play_sound
+          priority: false
+          sound_file: !lambda return id(jack_connected_sound);
+      - delay: 800ms
+      - lambda: id(jack_plugged_recently) = false;
+      - script.execute: control_leds
+    # When the jack is unplugged:
+    #  - LED animation
+    #  - Sound played
+    on_release:
+      - lambda: id(jack_unplugged_recently) = true;
+      - script.execute: control_leds
+      - delay: 200ms
+      - script.execute:
+          id: play_sound
+          priority: false
+          sound_file: !lambda return id(jack_disconnected_sound);
+      - delay: 800ms
+      - lambda: id(jack_unplugged_recently) = false;
+      - script.execute: control_leds

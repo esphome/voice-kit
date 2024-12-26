@@ -86,7 +86,6 @@
           }
 
           const releases = await response.json();
-          const versions = releases.map(release => release.tag_name);
 
           const e = document.getElementById("releases");
           e.innerHTML = "";
@@ -96,10 +95,16 @@
           defaultOption.value = "";
           e.appendChild(defaultOption);
 
-          versions.forEach(version => {
+          releases.forEach(release => {
             const option = document.createElement("option");
-            option.text = version;
-            option.value = version;
+            option.text = release.tag_name;
+            option.value = release.tag_name;
+
+            if (release.draft) {
+              option.text += " (draft)";
+            } else if (release.prerelease) {
+              option.text += " (pre-release)";
+            }
             e.appendChild(option);
           });
 

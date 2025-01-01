@@ -7,12 +7,98 @@ on:
     paths:
       - static/**
       - .github/workflows/gh-pages.yml
+  release:
+    types:
+      - published
+      - unpublished
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Fetch releases and update HTML
+        shell: python
+        run: |
+          import datetime
+          import os
+          import requests
+          import re
+
+          repo = os.getenv('GITHUB_REPOSITORY')
+          event_name = os.getenv('GITHUB_EVENT_NAME', 'unknown')
+          run_id = os.getenv('GITHUB_RUN_ID', 'unknown')
+          ref = os.getenv('GITHUB_REF', 'unknown')
+          timestamp = datetime.datetime.now().isoformat()
+
+          run_url = f"https://github.com/{repo}/actions/runs/{run_id}"
+          api_url = f'https://api.github.com/repos/{repo}/releases'
+
+          response = requests.get(api_url)
+          releases = response.json()
+
+          # create <option> elements for <select> list
+          releases_options = ""
+          for release in releases:
+              release_name = release['name'] if release['name'] else release['tag_name']
+              description = ""
+
+              if release['prerelease']:
+                  description = " (pre-release)"
+
+              releases_options += f'<option value="{release_name}">{release_name}{description}</option>\n'
+
+          # replace <option> elements inside <select id="releases">...</select>
+          html_file_path = 'static/index.html'
+          with open(html_file_path, 'r') as file:
+              html_content = file.read()
+
+          html_content = re.sub(
+              r'(<select id="releases">).*?(</select>)',
+              f'\\1{releases_options}\\2',
+              html_content,
+              flags=re.DOTALL
+          )
+
+          # add metadata to beginning of HTML file
+          metadata = f"<!-- created: {timestamp} -->\n"
+          metadata += f"<!-- CI/CD run: {run_url} -->\n"
+          metadata += f"<!-- triggered by: {event_name} -->\n"
+          metadata += f"<!-- branch/tag: {ref} -->\n"
+          html_content = metadata + html_content
+
+          # write updated content back to the file
+          with open(html_file_path, 'w') as file:
+            file.write(html_content)
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3.0.1
+        with:
+          path: static
+          retention-days: 1
+
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -22,13 +108,8 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.2.2
-      - uses: actions/upload-pages-artifact@v3.0.1
-        with:
-          path: static
-          retention-days: 1
       - name: Setup Pages
         uses: actions/configure-pages@v5.0.0
       - name: Deploy to GitHub Pages

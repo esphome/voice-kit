@@ -63,12 +63,8 @@ jobs:
           releases_options = ""
           for release in releases:
               release_name = release['name'] if release['name'] else release['tag_name']
-              description = ""
-
-              if release['prerelease']:
-                  description = " (pre-release)"
-
-              releases_options += f'<option value="{release_name}">{release_name}{description}</option>\n'
+              release_description = " (pre-release)" if release['prerelease'] else ""
+              releases_options += f'<option value="{release_name}">{release_name}{release_description}</option>\n'
 
           # replace <option> elements inside <select id="releases">...</select>
           html_file_path = 'static/index.html'

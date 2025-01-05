@@ -1663,6 +1663,9 @@ button:
     name: "Factory Reset"
     entity_category: diagnostic
     internal: true
+  - platform: restart
+    id: restart_button
+    name: "Restart"
 
 debug:
   update_interval: 5s

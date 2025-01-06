@@ -1666,6 +1666,7 @@ button:
   - platform: restart
     id: restart_button
     name: "Restart"
+    entity_category: config
 
 debug:
   update_interval: 5s

@@ -110,11 +110,11 @@ logger:
 
 api:
   id: api_id
-  services:
-    - service: start_va
+  actions:
+    - action: start_va
       then:
         - voice_assistant.start
-    - service: stop_va
+    - action: stop_va
       then:
         - voice_assistant.stop
   on_client_connected:

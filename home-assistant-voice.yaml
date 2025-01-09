@@ -113,7 +113,19 @@ api:
   actions:
     - action: start_va
       then:
-        - voice_assistant.start
+        - if:
+            condition:
+              and:
+                - switch.is_off: master_mute_switch
+                - not:
+                    voice_assistant.is_running
+            then:
+              - script.execute:
+                  id: play_sound
+                  priority: true
+                  sound_file: !lambda return id(center_button_press_sound);
+              - delay: 300ms
+              - voice_assistant.start:
     - action: stop_va
       then:
         - voice_assistant.stop

@@ -1415,6 +1415,7 @@ microphone:
 
 speaker:
   - platform: i2s_audio
+    id: i2s_audio_speaker
     sample_rate: 48000
     i2s_mode: secondary
     i2s_dout_pin: GPIO10

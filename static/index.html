@@ -63,10 +63,16 @@
     <br />
     <details>
       <summary>Install Specific Version</summary>
-      Version: <input /><br />
+      Select a Release: <select id="releases"></select><br />
       <div class="link"></div>
     </details>
     <script>
+      function selectVersion(version) {
+        select = document.getElementById("releases")
+        const option = Array.from(select.options).find(option => option.value === version);
+        select.selectedIndex = option ? option.index : 0;
+      }
+	    
       function setVersion(version) {
         document.querySelector("h1").innerHTML = `Install Voice PE v${version}`;
         document.querySelector(
@@ -76,15 +82,17 @@
           ".link",
         ).innerHTML = `<a href="?version=${version}">Link to v${version}</a>`;
       }
-
-      document.querySelector("input").addEventListener("input", (ev) => {
+	  
+      document.querySelector("#releases").addEventListener("change", (ev) => {
         const version = ev.target.value;
         setVersion(version);
       });
+
       var urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has("version")) {
         const version = urlParams.get("version");
         setVersion(version);
+        selectVersion(version);
       }
     </script>
   </body>

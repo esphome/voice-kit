@@ -19,7 +19,7 @@ esphome:
   name: home-assistant-voice
   friendly_name: Home Assistant Voice
   name_add_mac_suffix: true
-  min_version: 2024.12.2
+  min_version: 2024.12.4
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
@@ -1514,9 +1514,6 @@ external_components:
       - nabu_microphone
       - voice_assistant
       - voice_kit
-    refresh: 0s
-  - source: github://pr#8018
-    components: [http_request]
     refresh: 0s
 
 audio_dac:
